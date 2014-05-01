@@ -1,8 +1,3 @@
-#include "SvxTGeo.C"
-
-#include <TCanvas.h>
-#include <TGeoManager.h>
-#include <TGeoVolume.h>
 
 void DrawVTX()
 {
