@@ -415,7 +415,7 @@ SvxTGeo::WriteSensorPars(ofstream &fs)
 void
 SvxTGeo::GetSensorXYZ(int lyr, int ldr, int sns, double *xyz)
 {
-  TGeoNode *sn = SensorNode(lyr,ldr,0);
+  TGeoNode *sn = SensorNode(lyr,ldr,sns);
   assert(sn);
   TGeoMatrix *M = sn->GetMatrix();
   assert(M);
