@@ -26,4 +26,13 @@ void rootlogon()
   gROOT->ProcessLine(Form(".I %s", inc));
 #endif
 
+  // Put build files (.d, .so, dicts) in $TMPDIR
+  // ===========================================
+  const char *tmpdir  = gSystem->Getenv("TMPDIR");
+  if (tmpdir)
+    gSystem->SetBuildDir(tmpdir);
+
+  // Build libraries
+  // ===============
+  gROOT->LoadMacro("../SvxTGeo.C+");
 }
