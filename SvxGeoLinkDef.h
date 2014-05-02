@@ -1,4 +1,4 @@
-// $Id:$
+// $Id: SvxGeoLinkDef.h,v 1.1 2014/05/02 17:00:11 adare Exp $
 
 #ifdef __CINT__
 
