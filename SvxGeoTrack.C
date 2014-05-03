@@ -1,4 +1,4 @@
-// $Id: SvxGeoTrack.C,v 1.1 2014/05/02 17:00:11 adare Exp $
+// $Id: SvxGeoTrack.C,v 1.2 2014/05/03 13:28:22 adare Exp $
 
 #include "SvxGeoTrack.h"
 #include "TString.h"
@@ -73,7 +73,7 @@ SvxGeoTrack::GetHit(int i)
   if (i<0 || i>=(int)hits.size())
   {
     Printf("Error in SvxGeoTrack::GetHit(): Hit index %d "
-           "outside valid range (0-%d).\n", i, hits.size()-1);
+           "outside valid range (0-%d).\n", i, (int)hits.size()-1);
   }
   return hits.at(i);
 }
