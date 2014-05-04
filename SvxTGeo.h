@@ -1,4 +1,4 @@
-// $Id: SvxTGeo.h,v 1.3 2014/05/02 19:24:15 adare Exp $  
+// $Id: SvxTGeo.h,v 1.3 2014/05/02 19:24:15 adare Exp $
 
 #ifndef __SVXTGEO_H__
 #define __SVXTGEO_H__
@@ -13,6 +13,7 @@ class TGeoNode;
 class TGeoManager;
 class TGeoTranslation;
 class TGeoCombiTrans;
+class TPolyLine;
 
 using namespace std;
 
@@ -46,8 +47,8 @@ public:
   float LayerRadius(int layer);
   float SensorRadius(int layer, int ladder, int sensor);
   float SensorPhiDeg(int layer, int ladder, int sensor);
-
   TGeoNode *SensorNode(int lyr, int ldr, int sns);
+  TPolyLine *LadderOutlineXY(int lyr, int ldr);
 
   TGeoManager *GeoManager()
   {
