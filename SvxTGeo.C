@@ -11,6 +11,9 @@
 #include <TGeoManager.h>
 #include <TGeoNavigator.h>
 #include <TGeoMatrix.h>
+#include <TPolyLine.h>
+#include <TVectorD.h>
+#include <TMatrixD.h>
 
 #include <string>
 #include <iostream>
@@ -101,6 +104,64 @@ SvxTGeo::AddVolume(TGeoVolume *parent, TGeoVolume *daughter,
   TGeoRotation *rot = new TGeoRotation("rot", phi, theta, psi);
   TGeoCombiTrans *placement = new TGeoCombiTrans(x, y, z, rot);
   parent->AddNode(daughter, 1, placement);
+  return;
+}
+
+void
+SvxTGeo::AddLadder(int lyr, int ldr, double x, double y, double zoff,
+                   double phi, double theta, double psi)
+{
+  // Add a sensor that was not in the original par file.
+  // Phi, theta, and psi should be in radians.
+  if (ldr < fNLadders[lyr])
+  {
+    Printf("SvxTGeo::AddLadder(): "
+           "Provided ladder index %d must be larger than %d",
+           ldr, fNLadders[lyr]-1);
+    return;
+  }
+
+  for (int sns=0; sns<fNSensors[lyr]; sns++)
+  {
+    double xhw = fSensorXHW[lyr];
+    double yhw = fSensorYHW[lyr];
+    double zhw = fSensorZHW[lyr];
+    double z = zoff + SensorNode(lyr,0,sns)->GetMatrix()->GetTranslation()[2];
+    double r2d = 180./TMath::Pi();
+
+    TGeoRotation *rot = new TGeoRotation("rot", r2d*phi, r2d*theta, r2d*psi);
+    TGeoCombiTrans *placement = new TGeoCombiTrans(x, y, z, rot);
+    TGeoVolume *vol = fGeoMgr->MakeBox(Form("sensor_%d_%d_%d",lyr,ldr,sns),
+                                       fSiliconMedia, xhw, yhw, zhw);
+    vol->SetLineColor(kRed);
+    fTopVolume->AddNode(vol, 1, placement);
+    indx[lyr][ldr][sns] = sensors.size();
+    GBox s;
+    s.x     = x;
+    s.y     = y;
+    s.z     = z;
+    s.xhw   = xhw;
+    s.yhw   = yhw;
+    s.zhw   = zhw;
+    s.phi   = phi;
+    s.theta = theta;
+    s.psi   = psi;
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 3; j++)
+        s.R(i,j) = rot->GetRotationMatrix()[3*j + i];
+
+    // double r2d = 180./TMath::Pi();
+    // sensors[i].phi   = r2d*TMath::ATan2(s.R(0,1), s.R(0,0));
+    // sensors[i].theta = r2d*TMath::ATan2(s.R(1,2), s.R(2,2));
+
+    sensors.push_back(s);
+  }
+
+  fNLadders[lyr]++;
+  if (x>0)
+    fNLaddersW[lyr]++;
+  else
+    fNLaddersE[lyr]++;
   return;
 }
 
@@ -504,6 +565,17 @@ SvxTGeo::SensorRadius(int layer, int ladder, int sensor)
 }
 
 float
+SvxTGeo::SensorPhi(int layer, int ladder, int sensor)
+{
+  // Return phi position of sensor in radians.
+  TGeoMatrix *m = SensorNode(layer, ladder, sensor)->GetMatrix();
+  float x = m->GetTranslation()[0];
+  float y = m->GetTranslation()[1];
+
+  return TMath::ATan2(y,x);
+}
+
+float
 SvxTGeo::SensorPhiDeg(int layer, int ladder, int sensor)
 {
   // Return phi position of sensor in degrees.
@@ -513,3 +585,196 @@ SvxTGeo::SensorPhiDeg(int layer, int ladder, int sensor)
 
   return TMath::ATan2(y,x) * 180./TMath::Pi();
 }
+
+float
+SvxTGeo::GetLadderPhiTilt(int layer, int ladder)
+{
+  TGeoMatrix *m = SensorNode(layer, ladder, 0)->GetMatrix();
+  return TMath::ACos(m->GetRotationMatrix()[0]);
+}
+
+TPolyLine *
+SvxTGeo::LadderOutlineXY(int lyr, int ldr)
+{
+  TGeoMatrix *M = SensorNode(lyr, ldr, 0)->GetMatrix();
+  assert(M);
+  double xhw=fSensorXHW[lyr], yhw=fSensorYHW[lyr], zhw=fSensorZHW[lyr];
+
+  // Ladder corners:
+  // d------c
+  // |      |
+  // a------b
+  TVectorD a(2);
+  TVectorD b(2);
+  TVectorD c(2);
+  TVectorD d(2);
+  a(0) = -xhw; a(1) = -yhw;
+  b(0) = +xhw; b(1) = -yhw;
+  c(0) = +xhw; c(1) = +yhw;
+  d(0) = -xhw; d(1) = +yhw;
+
+  // Rotate corner positions
+  TMatrixD R(2,2);
+  R(0,0) = M->GetRotationMatrix()[0]; // cos
+  R(0,1) = M->GetRotationMatrix()[1]; // -sin
+  R(1,0) = M->GetRotationMatrix()[3]; // sin
+  R(1,1) = M->GetRotationMatrix()[4]; // cos
+  a *= R; b *= R; c *= R; d *= R;
+
+  // Translate
+  TVectorD r(2);
+  r(0) = M->GetTranslation()[0];
+  r(1) = M->GetTranslation()[1];
+  a += r; b += r; c += r; d += r;
+
+  Double_t xarr[5] = {a(0),b(0),c(0),d(0),a(0)};
+  Double_t yarr[5] = {a(1),b(1),c(1),d(1),a(1)};
+  return new TPolyLine(5,xarr,yarr);
+}
+
+
+
+
+
+/*
+TCanvas *
+DrawDiffs(vecd &x1, vecd &y1, vecd &z1,
+          vecd &x2, vecd &y2, vecd &z2,
+          const char *name, const char *title)
+{
+  TCanvas *c = new TCanvas(name, title, 900, 900);
+  TH1F *hf = c->DrawFrame(-20, -20, 20, 20, title);
+  hf->SetXTitle("East                 x [cm]                 West");
+  hf->GetXaxis()->CenterTitle();
+  hf->SetYTitle("y [cm]");
+  hf->GetYaxis()->CenterTitle();
+
+  int n = (int)x1.size();
+
+  for (int i=0; i<n; i++)
+  {
+    double f = 20;
+    double x = x1[i], y = y1[i];
+    double dx = x2[i] - x;
+    double dy = y2[i] - y;
+    double dz = z2[i] - z1[i];
+
+    // Draw points showing displacement in z coordinate
+    TMarker mkr;
+    mkr.SetMarkerStyle(kOpenCircle);
+    mkr.SetMarkerColor(kGray+1);
+    mkr.SetMarkerSize(0.5);
+    //    mkr.DrawMarker(x,y);
+
+    if (TMath::Abs(dz) > 0)
+    {
+      mkr.SetMarkerStyle(kFullCircle);
+      mkr.SetMarkerColor(dz>0 ? kRed-4 : kAzure-2); // Red/blue shift mnemonic
+      mkr.SetMarkerSize(50*TMath::Abs(dz)); // 1 = 8px diam, 2 = 16px, ...
+      mkr.DrawMarker(x,y);
+
+      TLatex ltx;
+      ltx.SetTextSize(0.015);
+      ltx.SetTextAlign(22);
+      ltx.SetTextColor(dz>0 ? kRed+2 : kAzure+2);
+      ltx.DrawLatex(x, y, Form("%.0f", 1e4*dz));
+    }
+
+    // Draw arrows showing (significant) displacements in xy plane
+    if (dx*dx + dy*dy > 1e-3)
+    {
+      TArrow a;
+      a.SetLineWidth(2);
+      a.DrawArrow(x, y, x + f*dx, y + f*dy, 0.005);
+
+      TLatex ltx;
+      ltx.SetTextSize(0.01);
+      ltx.DrawLatex(x + f*dx, y + f*dy, Form("(%.0f, %.0f)", 1e4*dx, 1e4*dy));
+    }
+
+  }
+
+  return c;
+}
+
+void
+UpdateHits(geoTracks &tracks)
+{
+  for (unsigned int i=0; i<tracks.size(); i++)
+    for (int j=0; j<tracks[i].nhits; j++)
+    {
+      double xc=0, yc=0, zc=0;
+      tracks[i].hits[j].GetCurrentXYZ(xc,yc,zc);
+
+      tracks[i].hits[j].x = xc;
+      tracks[i].hits[j].y = yc;
+      tracks[i].hits[j].z = zc;
+    }
+  return;
+}
+
+// void
+// DrawSensorsXY(SvxTGeo *geo)
+// {
+//   TBox box;
+//   double xyz[3] = {0};
+//   double xhw, yhw, zhw;
+//   for (int i=0; i<geo->GetNLayers(); i++)
+//     for (int j=0; j<geo->GetNLadders(i); j++)
+//     {
+//       geo->GetSensorXYZ(i, j, 0, xyz);
+//       geo->GetSensorHalfWidths(i, xhw, yhw, zhw);
+//       double phideg = geo->SensorPhiDeg(i,j,0);
+
+//       double x1 = xyz[0]-xhw;
+//       double y1 = xyz[1]-yhw;
+//       double x2 = xyz[0]+xhw;
+//       double y2 = xyz[1]+yhw;
+//       box.DrawBox(x1, y1, x2, y2);
+//     }
+
+//   return;
+// }
+
+void
+DrawLabels(SvxTGeo *geo)
+{
+  TLatex label;
+  // Horiz:  1=left adjusted, 2=centered, 3=right adjusted
+  // Vert:   1=bottom adjusted, 2=centered, 3=top adjusted
+  label.SetTextAlign(22); // align = 10*Horiz + Vert
+  label.SetTextSize(0.015);
+  label.SetTextColor(kGray+1);
+  double xyz[3] = {0};
+  double xhw, yhw, zhw;
+  for (int i=0; i<geo->GetNLayers(); i++)
+    for (int j=0; j<geo->GetNLadders(i); j++)
+    {
+      geo->GetSensorXYZ(i, j, 0, xyz);
+      geo->GetSensorHalfWidths(i, xhw, yhw, zhw);
+
+      label.DrawLatex(xyz[0], xyz[1], Form("%d", j));
+    }
+
+  return;
+}
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
