@@ -46,9 +46,14 @@ public:
   void GetSensorXYZ(int lyr, int ldr, int sns, double *xyz);
   float LayerRadius(int layer);
   float SensorRadius(int layer, int ladder, int sensor);
+  float SensorPhi(int layer, int ladder, int sensor);
   float SensorPhiDeg(int layer, int ladder, int sensor);
+  float GetLadderPhiTilt(int layer, int ladder); // In radians
   TGeoNode *SensorNode(int lyr, int ldr, int sns);
   TPolyLine *LadderOutlineXY(int lyr, int ldr);
+  void AddLadder(int lyr, int ldr,
+                 double x, double y, double zoffset,
+                 double phi, double theta=0, double psi=0);
 
   TGeoManager *GeoManager()
   {
@@ -111,7 +116,7 @@ public:
   };
 
   std::vector<GBox> sensors;
-  int indx[4][24][6]; // Not so nice. improve later
+  int indx[8][48][12]; // Allocate space for 2x max to accommodate new objects
 
 protected:
   TGeoManager  *fGeoMgr;

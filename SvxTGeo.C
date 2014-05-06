@@ -108,6 +108,64 @@ SvxTGeo::AddVolume(TGeoVolume *parent, TGeoVolume *daughter,
 }
 
 void
+SvxTGeo::AddLadder(int lyr, int ldr, double x, double y, double zoff,
+                   double phi, double theta, double psi)
+{
+  // Add a sensor that was not in the original par file.
+  // Phi, theta, and psi should be in radians.
+  if (ldr < fNLadders[lyr])
+  {
+    Printf("SvxTGeo::AddLadder(): "
+           "Provided ladder index %d must be larger than %d",
+           ldr, fNLadders[lyr]-1);
+    return;
+  }
+
+  for (int sns=0; sns<fNSensors[lyr]; sns++)
+  {
+    double xhw = fSensorXHW[lyr];
+    double yhw = fSensorYHW[lyr];
+    double zhw = fSensorZHW[lyr];
+    double z = zoff + SensorNode(lyr,0,sns)->GetMatrix()->GetTranslation()[2];
+    double r2d = 180./TMath::Pi();
+
+    TGeoRotation *rot = new TGeoRotation("rot", r2d*phi, r2d*theta, r2d*psi);
+    TGeoCombiTrans *placement = new TGeoCombiTrans(x, y, z, rot);
+    TGeoVolume *vol = fGeoMgr->MakeBox(Form("sensor_%d_%d_%d",lyr,ldr,sns),
+                                       fSiliconMedia, xhw, yhw, zhw);
+    vol->SetLineColor(kRed);
+    fTopVolume->AddNode(vol, 1, placement);
+    indx[lyr][ldr][sns] = sensors.size();
+    GBox s;
+    s.x     = x;
+    s.y     = y;
+    s.z     = z;
+    s.xhw   = xhw;
+    s.yhw   = yhw;
+    s.zhw   = zhw;
+    s.phi   = phi;
+    s.theta = theta;
+    s.psi   = psi;
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 3; j++)
+        s.R(i,j) = rot->GetRotationMatrix()[3*j + i];
+
+    // double r2d = 180./TMath::Pi();
+    // sensors[i].phi   = r2d*TMath::ATan2(s.R(0,1), s.R(0,0));
+    // sensors[i].theta = r2d*TMath::ATan2(s.R(1,2), s.R(2,2));
+
+    sensors.push_back(s);
+  }
+
+  fNLadders[lyr]++;
+  if (x>0)
+    fNLaddersW[lyr]++;
+  else
+    fNLaddersE[lyr]++;
+  return;
+}
+
+void
 SvxTGeo::AddSensor(int lyr, int ldr, int sns)
 {
   GBox s = sensors[indx[lyr][ldr][sns]];
@@ -507,6 +565,17 @@ SvxTGeo::SensorRadius(int layer, int ladder, int sensor)
 }
 
 float
+SvxTGeo::SensorPhi(int layer, int ladder, int sensor)
+{
+  // Return phi position of sensor in radians.
+  TGeoMatrix *m = SensorNode(layer, ladder, sensor)->GetMatrix();
+  float x = m->GetTranslation()[0];
+  float y = m->GetTranslation()[1];
+
+  return TMath::ATan2(y,x);
+}
+
+float
 SvxTGeo::SensorPhiDeg(int layer, int ladder, int sensor)
 {
   // Return phi position of sensor in degrees.
@@ -517,6 +586,13 @@ SvxTGeo::SensorPhiDeg(int layer, int ladder, int sensor)
   return TMath::ATan2(y,x) * 180./TMath::Pi();
 }
 
+float
+SvxTGeo::GetLadderPhiTilt(int layer, int ladder)
+{
+  TGeoMatrix *m = SensorNode(layer, ladder, 0)->GetMatrix();
+  return TMath::ACos(m->GetRotationMatrix()[0]);
+}
+
 TPolyLine *
 SvxTGeo::LadderOutlineXY(int lyr, int ldr)
 {
@@ -525,9 +601,9 @@ SvxTGeo::LadderOutlineXY(int lyr, int ldr)
   double xhw=fSensorXHW[lyr], yhw=fSensorYHW[lyr], zhw=fSensorZHW[lyr];
 
   // Ladder corners:
-  // d---c
-  // |   |
-  // a---b
+  // d------c
+  // |      |
+  // a------b
   TVectorD a(2);
   TVectorD b(2);
   TVectorD c(2);
@@ -543,10 +619,7 @@ SvxTGeo::LadderOutlineXY(int lyr, int ldr)
   R(0,1) = M->GetRotationMatrix()[1]; // -sin
   R(1,0) = M->GetRotationMatrix()[3]; // sin
   R(1,1) = M->GetRotationMatrix()[4]; // cos
-  a *= R;
-  b *= R;
-  c *= R;
-  d *= R;
+  a *= R; b *= R; c *= R; d *= R;
 
   // Translate
   TVectorD r(2);
