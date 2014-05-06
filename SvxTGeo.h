@@ -46,7 +46,7 @@ public:
   void GetSensorXYZ(int lyr, int ldr, int sns, double *xyz);
   float LayerRadius(int layer);
   float SensorRadius(int layer, int ladder, int sensor);
-  float SensorPhi(int layer, int ladder, int sensor);
+  float SensorPhiRad(int layer, int ladder, int sensor);
   float SensorPhiDeg(int layer, int ladder, int sensor);
   float GetLadderPhiTilt(int layer, int ladder); // In radians
   TGeoNode *SensorNode(int lyr, int ldr, int sns);
