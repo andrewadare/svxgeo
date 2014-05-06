@@ -565,7 +565,7 @@ SvxTGeo::SensorRadius(int layer, int ladder, int sensor)
 }
 
 float
-SvxTGeo::SensorPhi(int layer, int ladder, int sensor)
+SvxTGeo::SensorPhiRad(int layer, int ladder, int sensor)
 {
   // Return phi position of sensor in radians.
   TGeoMatrix *m = SensorNode(layer, ladder, sensor)->GetMatrix();
@@ -579,11 +579,7 @@ float
 SvxTGeo::SensorPhiDeg(int layer, int ladder, int sensor)
 {
   // Return phi position of sensor in degrees.
-  TGeoMatrix *m = SensorNode(layer, ladder, sensor)->GetMatrix();
-  float x = m->GetTranslation()[0];
-  float y = m->GetTranslation()[1];
-
-  return TMath::ATan2(y,x) * 180./TMath::Pi();
+  return SensorPhiRad(layer, ladder, sensor) * 180./TMath::Pi();
 }
 
 float
