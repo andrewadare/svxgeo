@@ -594,7 +594,7 @@ SvxTGeo::LadderOutlineXY(int lyr, int ldr)
 {
   TGeoMatrix *M = SensorNode(lyr, ldr, 0)->GetMatrix();
   assert(M);
-  double xhw=fSensorXHW[lyr], yhw=fSensorYHW[lyr], zhw=fSensorZHW[lyr];
+  double xhw=fSensorXHW[lyr], yhw=fSensorYHW[lyr];
 
   // Ladder corners:
   // d------c
