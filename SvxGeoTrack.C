@@ -73,7 +73,7 @@ SvxGeoTrack::GetHit(int i)
   if (i<0 || i>=(int)hits.size())
   {
     Printf("Error in SvxGeoTrack::GetHit(): Hit index %d "
-           "outside valid range (0-%d).\n", i, hits.size()-1);
+           "outside valid range (0-%lu).\n", i, hits.size()-1);
   }
   return hits.at(i);
 }
