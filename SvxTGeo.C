@@ -1,4 +1,4 @@
-// $Id: SvxTGeo.C,v 1.2 2014/05/02 17:53:54 adare Exp $
+// $Id: SvxTGeo.C,v 1.3 2014/05/06 17:26:21 adare Exp $
 
 #include "SvxTGeo.h"
 
@@ -594,7 +594,7 @@ SvxTGeo::LadderOutlineXY(int lyr, int ldr)
 {
   TGeoMatrix *M = SensorNode(lyr, ldr, 0)->GetMatrix();
   assert(M);
-  double xhw=fSensorXHW[lyr], yhw=fSensorYHW[lyr], zhw=fSensorZHW[lyr];
+  double xhw=fSensorXHW[lyr], yhw=fSensorYHW[lyr];
 
   // Ladder corners:
   // d------c
