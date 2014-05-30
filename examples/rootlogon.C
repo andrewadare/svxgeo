@@ -35,4 +35,6 @@ void rootlogon()
   // Build libraries
   // ===============
   gROOT->LoadMacro("../SvxTGeo.C+");
+  gROOT->LoadMacro("../SvxGeoTrack.C+");
+  gROOT->LoadMacro("../SvxProj.C+");
 }
