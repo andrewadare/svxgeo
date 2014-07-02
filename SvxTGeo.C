@@ -246,15 +246,35 @@ SvxTGeo::ReadParFile(const char *filename)
       if (ln== 6) fCage1 = pars;
       if (ln== 7) fCage2 = pars;
       if (ln==10) fNLayers = (int)pars[0];
-      if (ln==11) fRadii = pars;
+      if (ln==11)
+      {
+        double r[5] = {2.63000, 5.13000, 11.76500, 16.68700, 1.21400};
+        for (int i=0; i<fNLayers+1; i++)
+          fRadii.push_back(pars[i] > 0 ? pars[i] : r[i]);
+      }
 
       if (ln==13)
         for (int i=0; i<fNLayers; i++)
           fNSensors.push_back((int)pars[i]);
 
-      if (ln==14) fSensorXHW = pars;
-      if (ln==15) fSensorYHW = pars;
-      if (ln==16) fSensorZHW = pars;
+      if (ln==14)
+      {
+        double w[4] = {0.69600, 0.69600, 1.74500, 1.74500};
+        for (int i=0; i<4; i++)
+          fSensorXHW.push_back(pars[i] > 0 ? pars[i] : w[i]);
+      }
+      if (ln==15)
+      {
+        double w[4] = {0.01000, 0.01000, 0.03125, 0.03125};
+        for (int i=0; i<4; i++)
+          fSensorYHW.push_back(pars[i] > 0 ? pars[i] : w[i]);
+      }
+      if (ln==16)
+      {
+        double w[4] = {2.83600, 2.83600, 3.18770, 3.18770};
+        for (int i=0; i<4; i++)
+          fSensorZHW.push_back(pars[i] > 0 ? pars[i] : w[i]);
+      }
       if (ln==17) fSensorZGap = pars;
       if (ln==18) fX0add = pars;
       if (ln==19) fDPhi  = pars;
