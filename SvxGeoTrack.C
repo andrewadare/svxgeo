@@ -67,6 +67,31 @@ SvxGeoHit::GetCurrentXYZ(double &x, double &y, double &z)
   return;
 }
 
+void
+SvxGeoHit::Update()
+{
+  // Update global hit x,y,z position in current geometry.
+  // Local xs,ys,zs position on sensor remains unchanged.
+
+  double xc=0, yc=0, zc=0;
+  GetCurrentXYZ(xc,yc,zc);
+
+  x = xc;
+  y = yc;
+  z = zc;
+
+  return;
+}
+
+void
+SvxGeoTrack::UpdateHits()
+{
+  for (int i=0; i<nhits; i++)
+    hits[i].Update();
+  
+  return;
+}
+
 SvxGeoHit
 SvxGeoTrack::GetHit(int i)
 {

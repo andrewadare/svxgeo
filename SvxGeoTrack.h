@@ -18,6 +18,10 @@ public:
   // This can differ from member x,y,z if geometry is changed after assignment.
   void GetCurrentXYZ(double &x, double &y, double &z);
 
+  // Update global hit x,y,z position in current geometry.
+  // Local xs,ys,zs position on sensor remains unchanged.
+  void Update();
+
   // These variables are "dumb", i.e. not synced to detector geometry.
   int layer,ladder,sensor,component,tile;
   double x,y,z;    // Global position.
@@ -41,6 +45,10 @@ public:
   SvxGeoTrack();
   ~SvxGeoTrack() {};
   SvxGeoHit GetHit(int i);
+
+  // Update global position of all hits to current geometry.
+  void UpdateHits();
+
   void Print();
 
   int nhits;
