@@ -18,6 +18,10 @@ void DrawVTX()
   // Close geometry to check for problems (overlapping boundaries)
   mgr->CloseGeometry();
 
+  // Perform a few nonsensical manipulations for demonstration.
+  // geo->TranslateHalfLayer(3, 1, 10., 0., 0);
+  // geo->RotateHalfLayer(3, 1, TMath::Pi()/4, 0., 0);
+
   // Press j,k to zoom; u,i to look up/down; h,l to look left, right.
   TCanvas *c = new TCanvas("c", "svx model", 1400, 1000);
   c->SetFillColor(kBlack);

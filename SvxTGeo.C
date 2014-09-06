@@ -1,4 +1,3 @@
-// $Id: SvxTGeo.C,v 1.2 2014/05/02 17:53:54 adare Exp $
 
 #include "SvxTGeo.h"
 
@@ -149,10 +148,6 @@ SvxTGeo::AddLadder(int lyr, int ldr, double x, double y, double zoff,
     for (int i = 0; i < 3; i++)
       for (int j = 0; j < 3; j++)
         s.R(i,j) = rot->GetRotationMatrix()[3*j + i];
-
-    // double r2d = 180./TMath::Pi();
-    // sensors[i].phi   = r2d*TMath::ATan2(s.R(0,1), s.R(0,0));
-    // sensors[i].theta = r2d*TMath::ATan2(s.R(1,2), s.R(2,2));
 
     sensors.push_back(s);
   }
@@ -540,7 +535,7 @@ SvxTGeo::MoveLadderRadially(int layer, int ladder, float dr /*cm*/)
 void
 SvxTGeo::RotateLadder(int layer, int ladder, float polarx, float polary, float phi)
 {
-  // Rotate from current position about center of PHENIX.
+  // Rotate from current position about center of VTX.
   // polarx, polary, and phi are angles w.r.t. the x,y,z axes in degrees.
   for (int i=0; i<fNSensors[layer]; i++)
   {
@@ -564,6 +559,61 @@ SvxTGeo::RotateLadderRPhi(int layer, int ladder, float rphi)
     TGeoMatrix *m = SensorNode(layer, ladder, sensor)->GetMatrix();
     m->RotateZ(dphi);
   }
+  return;
+}
+
+void
+SvxTGeo::TranslateHalfLayer(int layer, int arm, float x, float y, float z)
+{
+  int first = -1;
+  int last  = -1;
+  if (arm == 0) // East
+  {
+    first = GetNLadders(layer)/2;
+    last  = GetNLadders(layer) - 1;
+  }
+  else if (arm == 1) // West
+  {
+    first = 0;
+    last  = GetNLadders(layer)/2 - 1;
+  }
+  else
+    return;
+
+  for (int ldr = first; ldr <= last; ldr++)
+    TranslateLadder(layer, ldr, x, y, z);
+
+  return;
+}
+
+void
+SvxTGeo::RotateHalfLayer(int layer, int arm, 
+                         float aboutx, float abouty, float aboutz)
+{
+  // The parameters aboutx (theta), abouty, and aboutz (phi) are the angles 
+  // in RADIANS about the x, y, and z axes.
+
+  int first = -1;
+  int last  = -1;
+  if (arm == 0) // East
+  {
+    first = GetNLadders(layer)/2;
+    last  = GetNLadders(layer) - 1;
+  }
+  else if (arm == 1) // West
+  {
+    first = 0;
+    last  = GetNLadders(layer)/2 - 1;
+  }
+  else
+    return;
+
+  // Pass rotation angles in DEGREES to RotateLadder()
+  for (int ldr = first; ldr <= last; ldr++)
+    RotateLadder(layer, ldr, 
+                 aboutx * 180./TMath::Pi(), 
+                 abouty * 180./TMath::Pi(), 
+                 aboutz * 180./TMath::Pi());
   return;
 }
 

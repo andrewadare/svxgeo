@@ -1,4 +1,3 @@
-// $Id: SvxTGeo.h,v 1.3 2014/05/02 19:24:15 adare Exp $
 
 #ifndef __SVXTGEO_H__
 #define __SVXTGEO_H__
@@ -39,8 +38,10 @@ public:
   void WriteGlobalPars(ofstream &fs);
   void WriteBarrelPars(ofstream &fs);
   void WriteSensorPars(ofstream &fs);
+  void TranslateHalfLayer(int layer, int arm, float x, float y, float z);
   void TranslateLadder(int layer, int ladder, float x, float y, float z);
   void MoveLadderRadially(int layer, int ladder, float dr /*cm*/);
+  void RotateHalfLayer(int layer, int arm, float aboutx, float abouty, float aboutz);
   void RotateLadder(int layer, int ladder, float polarx, float polary, float phi);
   void RotateLadderRPhi(int layer, int ladder, float rphi);
   void GetSensorXYZ(int lyr, int ldr, int sns, double *xyz);
