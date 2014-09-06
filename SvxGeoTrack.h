@@ -1,4 +1,3 @@
-// $Id: SvxGeoTrack.h,v 1.1 2014/05/02 17:00:11 adare Exp $
 
 #ifndef __SVXGEOTRACK_H__
 #define __SVXGEOTRACK_H__
