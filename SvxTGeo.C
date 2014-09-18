@@ -565,20 +565,8 @@ SvxTGeo::RotateLadderRPhi(int layer, int ladder, float rphi)
 void
 SvxTGeo::TranslateHalfLayer(int layer, int arm, float x, float y, float z)
 {
-  int first = -1;
-  int last  = -1;
-  if (arm == 0) // East
-  {
-    first = GetNLadders(layer)/2;
-    last  = GetNLadders(layer) - 1;
-  }
-  else if (arm == 1) // West
-  {
-    first = 0;
-    last  = GetNLadders(layer)/2 - 1;
-  }
-  else
-    return;
+  int first = -1, last  = -1;
+  LadderRange(layer, arm, first, last);
 
   for (int ldr = first; ldr <= last; ldr++)
     TranslateLadder(layer, ldr, x, y, z);
@@ -587,14 +575,42 @@ SvxTGeo::TranslateHalfLayer(int layer, int arm, float x, float y, float z)
 }
 
 void
-SvxTGeo::RotateHalfLayer(int layer, int arm, 
+SvxTGeo::RotateHalfLayer(int layer, int arm,
                          float aboutx, float abouty, float aboutz)
 {
-  // The parameters aboutx (theta), abouty, and aboutz (phi) are the angles 
+  // The parameters aboutx (theta), abouty, and aboutz (phi) are the angles
   // in RADIANS about the x, y, and z axes.
 
-  int first = -1;
-  int last  = -1;
+  int first = -1, last  = -1;
+  LadderRange(layer, arm, first, last);
+
+  // Pass rotation angles in DEGREES to RotateLadder()
+  for (int ldr = first; ldr <= last; ldr++)
+    RotateLadder(layer, ldr,
+                 aboutx * 180./TMath::Pi(),
+                 abouty * 180./TMath::Pi(),
+                 aboutz * 180./TMath::Pi());
+  return;
+}
+
+void
+SvxTGeo::RotateHalfLayerRPhi(int layer, int arm, float rphi)
+{
+  // Rotate half-layer from current position about beamline.
+  // Rotate by dphi (deg) as calculated from s = R*phi (cm).
+  int first = -1, last  = -1;
+  LadderRange(layer, arm, first, last);
+
+  for (int ldr = first; ldr <= last; ldr++)
+    RotateLadderRPhi(layer, ldr, rphi);
+
+  return;
+}
+
+void
+SvxTGeo::LadderRange(int layer, int arm, int &first, int &last)
+{
+  // Assign index of first and last ladder in this layer and arm.
   if (arm == 0) // East
   {
     first = GetNLadders(layer)/2;
@@ -606,14 +622,7 @@ SvxTGeo::RotateHalfLayer(int layer, int arm,
     last  = GetNLadders(layer)/2 - 1;
   }
   else
-    return;
-
-  // Pass rotation angles in DEGREES to RotateLadder()
-  for (int ldr = first; ldr <= last; ldr++)
-    RotateLadder(layer, ldr, 
-                 aboutx * 180./TMath::Pi(), 
-                 abouty * 180./TMath::Pi(), 
-                 aboutz * 180./TMath::Pi());
+    Printf("WARNING from SvxTGeo::LadderRange(): Ladders not assigned!");
   return;
 }
 
