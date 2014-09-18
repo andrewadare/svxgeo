@@ -5,7 +5,7 @@ void ZeroFieldTopology()
   // Build model.
   SvxTGeo *geo = new SvxTGeo;
   geo->ReadParFile("parfiles/svxPISA.par");
-  geo->MakeTopVolume(200/2, 200/2, 200/2);
+  geo->MakeTopVolume(100, 100, 100);
   geo->AddSensors();
   TGeoManager *mgr = geo->GeoManager();
   TGeoVolume *top = mgr->GetTopVolume();
@@ -47,11 +47,13 @@ void ZeroFieldTopology()
   GetTracksFromTree(t, geo, tracks);
 
   // Draw
-  for (unsigned int i=0; i<tracks.size()/100; i++)
+  unsigned int ntdraw = t->GetEntries() > 1000 ? 1000 : t->GetEntries();
+  for (unsigned int i=0; i<ntdraw; i++)
   {
     SvxGeoTrack track = tracks[i];
     DrawTrackRoute(geo, track);
   }
+  c->Print("zft.pdf");
 
   return;
 }
@@ -80,7 +82,7 @@ DrawTrackRoute(SvxTGeo *geo, SvxGeoTrack &t)
     }
   }
 
-  if (B2L3 && smalldz)
+//  if (B2L3 && smalldz)
   {
     TColor *bluet = gROOT->GetColor(kBlue+1);
     bluet->SetAlpha(0.02);
@@ -105,7 +107,7 @@ GetTracksFromTree(TNtuple *t, SvxTGeo *geo, geoTracks &tracks)
   long nentries = t->GetEntries();
   int previd = -1;
 
-  Printf("Reading tracks from NTuple...");
+  Printf("Reading tracks from NTuple (%d entries)...", (int)nentries);
   for (int i=0; i<nentries; i++)
   {
     t->GetEntry(i);
