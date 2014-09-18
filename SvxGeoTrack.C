@@ -3,6 +3,7 @@
 #include "TString.h"
 #include "TGeoNode.h"
 #include "TGeoMatrix.h"
+#include "TMath.h"
 
 #if !defined(__CINT__)
 ClassImp(SvxGeoTrack);
@@ -83,11 +84,31 @@ SvxGeoHit::Update()
 }
 
 void
+SvxGeoHit::UpdateResiduals()
+{
+  // Get stored position
+  double oldphi = TMath::ATan2(y, x);
+  double oldrad = TMath::Sqrt(x*x + y*y);
+
+  // Get current position
+  double xc=0, yc=0, zc=0;
+  GetCurrentXYZ(xc,yc,zc);
+  double newphi = TMath::ATan2(yc, xc);
+  double newrad = TMath::Sqrt(xc*xc + yc*yc);
+
+  // Update residuals here
+  ds -= 0.5*(oldrad + newrad)*(newphi - oldphi);
+  dz -= zc - z;
+
+  return;
+}
+
+void
 SvxGeoTrack::UpdateHits()
 {
   for (int i=0; i<nhits; i++)
     hits[i].Update();
-  
+
   return;
 }
 

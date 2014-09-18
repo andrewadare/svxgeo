@@ -21,7 +21,9 @@ public:
   // Local xs,ys,zs position on sensor remains unchanged.
   void Update();
 
-  // These variables are "dumb", i.e. not synced to detector geometry.
+  void UpdateResiduals();
+
+  // These variables are not synced to detector geometry.
   int layer,ladder,sensor,component,tile;
   double x,y,z;    // Global position.
   double xs,ys,zs; // Position on sensor wrt center point
