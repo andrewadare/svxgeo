@@ -18,7 +18,10 @@ void DrawVTX()
   // Close geometry to check for problems (overlapping boundaries)
   mgr->CloseGeometry();
 
-  // Perform a few nonsensical manipulations for demonstration.
+  // Perform a few nonsensical manipulations for obvious demonstration.
+  // enum EW {EAST=0, WEST=1};
+  // geo->RotateArm(WEST, 0, 0, TMath::PiOver2());
+  // geo->TranslateArm(WEST, 20., 0., 0);
   // geo->TranslateHalfLayer(3, 1, 10., 0., 0);
   // geo->RotateHalfLayer(3, 1, TMath::Pi()/4, 0., 0);
 
