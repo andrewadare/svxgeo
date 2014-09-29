@@ -20,7 +20,7 @@ void AddLadder()
   geo->AddLadder(1, 20, xyz[0], xyz[1], 0., geo->GetLadderPhiTilt(1,9));
   
   // Now rotate B1L20 by angular difference between B1L9 and B1L8.
-  double dphi = geo->SensorPhiDeg(1,9,0) - geo->SensorPhiDeg(1,8,0);
+  double dphi = geo->SensorPhiRad(1,9,0) - geo->SensorPhiRad(1,8,0);
   geo->RotateLadder(1, 20, 0., 0., dphi);
 
   // Done building model.
