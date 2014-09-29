@@ -39,13 +39,15 @@ public:
   void WriteBarrelPars(ofstream &fs);
   void WriteSensorPars(ofstream &fs);
   void LadderRange(int layer, int arm, int &first, int &last);
+  void TranslateArm(int arm, float x, float y, float z);
   void TranslateHalfLayer(int layer, int arm, float x, float y, float z);
   void TranslateLadder(int layer, int ladder, float x, float y, float z);
   void MoveLadderRadially(int layer, int ladder, float dr /*cm*/);
-  void RotateHalfLayer(int layer, int arm, float aboutx, float abouty, float aboutz);
-  void RotateHalfLayerRPhi(int layer, int arm, float rphi);
-  void RotateLadder(int layer, int ladder, float polarx, float polary, float phi);
-  void RotateLadderRPhi(int layer, int ladder, float rphi);
+  void RotateArm(int arm, float aboutx, float abouty, float aboutz); /*rad*/
+  void RotateHalfLayer(int layer, int arm, float aboutx, float abouty, float aboutz); /*rad*/
+  void RotateHalfLayerRPhi(int layer, int arm, float rphi); /*cm*/
+  void RotateLadder(int layer, int ladder, float aboutx, float abouty, float aboutz); /*rad*/
+  void RotateLadderRPhi(int layer, int ladder, float rphi); /*cm*/
   void GetSensorXYZ(int lyr, int ldr, int sns, double *xyz);
   float LayerRadius(int layer);
   float SensorRadius(int layer, int ladder, int sensor);

@@ -522,7 +522,7 @@ SvxTGeo::MoveLadderRadially(int layer, int ladder, float dr /*cm*/)
   // Change radial position by dr.
   for (int i=0; i<fNSensors[layer]; i++)
   {
-    float phi = SensorPhiDeg(layer, ladder, i) * TMath::Pi()/180;
+    float phi = SensorPhiRad(layer, ladder, i);
     float dx = dr*TMath::Cos(phi);
     float dy = dr*TMath::Sin(phi);
 
@@ -533,16 +533,17 @@ SvxTGeo::MoveLadderRadially(int layer, int ladder, float dr /*cm*/)
 }
 
 void
-SvxTGeo::RotateLadder(int layer, int ladder, float polarx, float polary, float phi)
+SvxTGeo::RotateLadder(int layer, int ladder, 
+                      float aboutx, float abouty, float aboutz)
 {
   // Rotate from current position about center of VTX.
-  // polarx, polary, and phi are angles w.r.t. the x,y,z axes in degrees.
+  // aboutx, abouty, and aboutz are angles w.r.t. the x,y,z axes in radians.
   for (int i=0; i<fNSensors[layer]; i++)
   {
     TGeoMatrix *m = SensorNode(layer, ladder, i)->GetMatrix();
-    m->RotateX(polarx);
-    m->RotateY(polary);
-    m->RotateZ(phi);
+    m->RotateX(180./TMath::Pi() * aboutx);
+    m->RotateY(180./TMath::Pi() * abouty);
+    m->RotateZ(180./TMath::Pi() * aboutz);
   }
   return;
 }
@@ -551,13 +552,13 @@ void
 SvxTGeo::RotateLadderRPhi(int layer, int ladder, float rphi)
 {
   // Rotate from current position about beamline.
-  // Rotate by dphi (deg) as calculated from s = R*phi (cm).
+  // Rotate by dphi as calculated from s = R*phi (cm).
   for (int sensor=0; sensor<fNSensors[layer]; sensor++)
   {
     float r = SensorRadius(layer, ladder, sensor);
     float dphi = TMath::ATan2(rphi,r) * 180./TMath::Pi();
     TGeoMatrix *m = SensorNode(layer, ladder, sensor)->GetMatrix();
-    m->RotateZ(dphi);
+    m->RotateZ(dphi); // dphi in degrees
   }
   return;
 }
@@ -575,21 +576,28 @@ SvxTGeo::TranslateHalfLayer(int layer, int arm, float x, float y, float z)
 }
 
 void
+SvxTGeo::TranslateArm(int arm, float x, float y, float z)
+{
+  for (int lyr=0; lyr<fNLayers; lyr++)
+    TranslateHalfLayer(lyr, arm, x, y, z);
+
+  return;
+}
+
+void
 SvxTGeo::RotateHalfLayer(int layer, int arm,
                          float aboutx, float abouty, float aboutz)
 {
   // The parameters aboutx (theta), abouty, and aboutz (phi) are the angles
   // in RADIANS about the x, y, and z axes.
+  // Consider a boat or plane pointed in the +z direction:
+  // aboutx = pitch; abouty = yaw; aboutz = roll.
 
   int first = -1, last  = -1;
   LadderRange(layer, arm, first, last);
 
-  // Pass rotation angles in DEGREES to RotateLadder()
   for (int ldr = first; ldr <= last; ldr++)
-    RotateLadder(layer, ldr,
-                 aboutx * 180./TMath::Pi(),
-                 abouty * 180./TMath::Pi(),
-                 aboutz * 180./TMath::Pi());
+    RotateLadder(layer, ldr, aboutx, abouty, aboutz);
   return;
 }
 
@@ -597,12 +605,26 @@ void
 SvxTGeo::RotateHalfLayerRPhi(int layer, int arm, float rphi)
 {
   // Rotate half-layer from current position about beamline.
-  // Rotate by dphi (deg) as calculated from s = R*phi (cm).
+  // Rotate by dphi as calculated from s = R*phi (cm).
   int first = -1, last  = -1;
   LadderRange(layer, arm, first, last);
 
   for (int ldr = first; ldr <= last; ldr++)
     RotateLadderRPhi(layer, ldr, rphi);
+
+  return;
+}
+
+void
+SvxTGeo::RotateArm(int arm, float aboutx, float abouty, float aboutz)
+{
+  // The parameters aboutx (theta), abouty, and aboutz (phi) are the angles
+  // in RADIANS about the x, y, and z axes.
+  // Consider a boat or plane pointed in the +z direction:
+  // aboutx = pitch; abouty = yaw; aboutz = roll.
+
+  for (int lyr=0; lyr<fNLayers; lyr++)
+    RotateHalfLayer(lyr, arm, aboutx, abouty, aboutz);
 
   return;
 }
