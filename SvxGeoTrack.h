@@ -57,6 +57,9 @@ public:
   double vx,vy,vz;
   double mom, phi0, the0;
   double bfield;
+  double xydca, zdca;
+  double yp0, z0;
+
   std::vector<SvxGeoHit> hits;
 
   ClassDef(SvxGeoTrack,1)

@@ -19,7 +19,11 @@ SvxGeoTrack::SvxGeoTrack() :
   mom(0.),
   phi0(0.),
   the0(0.),
-  bfield(0.)
+  bfield(0.),
+  xydca(0.),
+  zdca(0.),
+  yp0(0.),
+  z0(0.)
 {
 }
 
@@ -151,6 +155,7 @@ void SvxGeoTrack::Print()
   Printf("vertex: (%.3f, %.3f, %.3f)", vx, vy, vz);
   Printf("mom, phi0, the0, %.3f, %.3f, %.3f", mom, phi0, the0);
   Printf("bfield %.3f", bfield);
+  Printf("DCA %.3f (x-y), %.3f (z)", xydca, zdca);
 
   for (int j=0; j<nhits; j++)
   {
