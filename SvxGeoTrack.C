@@ -19,6 +19,7 @@ SvxGeoTrack::SvxGeoTrack() :
   mom(0.),
   phi0(0.),
   the0(0.),
+  phirot(0.),
   bfield(0.),
   xydca(0.),
   zdca(0.),
@@ -154,6 +155,7 @@ void SvxGeoTrack::Print()
   Printf("charge: %d", charge);
   Printf("vertex: (%.3f, %.3f, %.3f)", vx, vy, vz);
   Printf("mom, phi0, the0, %.3f, %.3f, %.3f", mom, phi0, the0);
+  Printf("phirot %.3f", phirot);
   Printf("bfield %.3f", bfield);
   Printf("DCA %.3f (x-y), %.3f (z)", xydca, zdca);
 

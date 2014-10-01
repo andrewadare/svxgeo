@@ -56,6 +56,7 @@ public:
   int charge;
   double vx,vy,vz;
   double mom, phi0, the0;
+  double phirot;
   double bfield;
   double xydca, zdca;
   double yp0, z0;
