@@ -1,4 +1,3 @@
-// $Id: SvxProj.C,v 1.2 2014/05/02 17:53:54 adare Exp $
 
 #include "SvxProj.h"
 #include <cassert>
@@ -69,7 +68,7 @@ SvxProj::FindHitsFromVertex(SvxGeoTrack &track, SvxTGeo *tgeo)
   double nx = TMath::Sin(track.the0)*TMath::Cos(phi);
   double ny = TMath::Sin(track.the0)*TMath::Sin(phi);
   double nz = TMath::Cos(track.the0);
-  TGeoNode *currentNode = mgr->InitTrack(track.vx,track.vy,track.vz,nx,ny,nz);
+  mgr->InitTrack(track.vx,track.vy,track.vz,nx,ny,nz);
 
   if (fVerbosity)
     Printf("Initialized track at (vx,vy,vz) %.2f,%.2f,%.2f with "
@@ -104,7 +103,7 @@ SvxProj::FindHitsFromVertex(SvxGeoTrack &track, SvxTGeo *tgeo)
     if (TString(vol->GetName()).Contains("sensor"))
     {
       SvxGeoHit hit;
-      currentNode = mgr->GetCurrentNode();
+      TGeoNode *currentNode = mgr->GetCurrentNode();
       SensorAddress(currentNode, hit);
       int layer = hit.layer;
 
