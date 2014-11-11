@@ -189,6 +189,36 @@ SvxTGeo::SensorNode(int lyr, int ldr, int sns)
 }
 
 void
+SvxTGeo::SetSensorColors(int color, int alpha_p)
+{
+  // alpha_p is an integer between 0 (opaque) and 100 (transparent).
+  for (int lyr=0; lyr<fNLayers; lyr++)
+    for (int ldr=0; ldr<fNLadders[lyr]; ldr++)
+      for (int sns=0; sns<fNSensors[lyr]; sns++)
+        SetSensorColor(lyr, ldr, sns, color, alpha_p);
+
+  return;
+}
+
+void
+SvxTGeo::SetSensorColor(int lyr, int ldr, int sns, int color, int alpha_p)
+{
+  // alpha_p is an integer between 0 (opaque) and 100 (transparent).
+  TGeoNode *n = SensorNode(lyr, ldr, sns);
+  if (n)
+  {
+    TGeoVolume *v = n->GetVolume();
+    if (v)
+    {
+      v->SetLineColor(color);
+      if (alpha_p >= 0 && alpha_p <= 100)
+        v->SetTransparency(alpha_p);
+    }
+  }
+  return;
+}
+
+void
 SvxTGeo::ReadParFile(const char *filename)
 {
   // Expected format for variables at each line
@@ -533,7 +563,7 @@ SvxTGeo::MoveLadderRadially(int layer, int ladder, float dr /*cm*/)
 }
 
 void
-SvxTGeo::RotateLadder(int layer, int ladder, 
+SvxTGeo::RotateLadder(int layer, int ladder,
                       float aboutx, float abouty, float aboutz)
 {
   // Rotate from current position about center of VTX.

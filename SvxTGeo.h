@@ -49,6 +49,9 @@ public:
   void RotateLadder(int layer, int ladder, float aboutx, float abouty, float aboutz); /*rad*/
   void RotateLadderRPhi(int layer, int ladder, float rphi); /*cm*/
   void GetSensorXYZ(int lyr, int ldr, int sns, double *xyz);
+  void SetSensorColor(int lyr, int ldr, int sns, int color, int alpha_p = 0);
+  void SetSensorColors(int color, int alpha_p = 0);
+
   float LayerRadius(int layer);
   float SensorRadius(int layer, int ladder, int sensor);
   float SensorPhiRad(int layer, int ladder, int sensor);
